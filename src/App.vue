@@ -3,11 +3,22 @@
     <div @click="clickOutside" class="overlay"></div>
     <header class="header">
       <h2>Учетные записи</h2>
-      <el-button type="primary" @click="onAdd">+</el-button>
+      <el-button class="add" type="primary" @click="onAdd">+</el-button>
     </header>
 
+    <div class="row" :style="gridTemplateStyle('LOCAL')">
+      <div v-for="label in LABEL_LIST" :key="label">
+        <div>{{ label }}</div>
+      </div>
+    </div>
+
     <el-form class="form">
-      <div v-for="item in store.list" :key="item.id" class="row">
+      <div
+        v-for="item in store.list"
+        :key="item.id"
+        class="row"
+        :style="gridTemplateStyle(item.authType)"
+      >
         <el-form-item :error="errors[item.id]?.tagsInput">
           <el-input
             placeholder="Метки (через ;)"
@@ -44,14 +55,15 @@
           />
         </el-form-item>
 
-        <el-button type="danger" @click="onRemove(item.id)"> Удалить </el-button>
+        <el-button type="danger" @click="onRemove(item.id)"><Trash /></el-button>
       </div>
     </el-form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
+import Trash from './icons/Trash.vue'
+import { onMounted, reactive } from 'vue'
 import { useAuthStore, type AuthKind } from '@/stores/authStore'
 
 const store = useAuthStore()
@@ -63,6 +75,14 @@ type Field = 'tagsInput' | 'authType' | 'username' | 'secret'
 type Errors = Record<string, Partial<Record<Field, string>>>
 
 const errors = reactive<Errors>({})
+
+const LABEL_LIST = ['Метки', 'Тип записи', 'Логин', 'Пароль']
+
+const gridTemplateStyle = (type: string) => {
+  return {
+    gridTemplateColumns: type === 'LOCAL' ? '200px 150px 1fr 1fr 50px' : '200px 150px 1fr 50px',
+  }
+}
 
 const validateField = (id: string, field: Field) => {
   const item = store.list.find((i) => i.id === id)
@@ -162,6 +182,11 @@ const onTypeChange = (id: string, value: AuthKind | '') => {
   store.patch(id, { authType: value })
   validateField(id, 'authType')
 }
+
+onMounted(() => {
+  // вывел для проверки данных
+  console.log(store.list)
+})
 </script>
 
 <style scoped>
@@ -170,6 +195,7 @@ const onTypeChange = (id: string, value: AuthKind | '') => {
   flex-direction: column;
   gap: 12px;
   max-width: 900px;
+  font-family: 'PT Sans', 'Arial', sans-serif;
 }
 
 .header {
@@ -180,11 +206,16 @@ const onTypeChange = (id: string, value: AuthKind | '') => {
   align-items: center;
 }
 
+.add {
+  width: 50px;
+  font-size: 20px;
+  font-weight: 100;
+}
+
 .row {
   position: relative;
   z-index: 3;
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1fr auto;
   gap: 8px;
 }
 
