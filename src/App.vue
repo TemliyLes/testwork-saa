@@ -1,11 +1,12 @@
 <template>
   <div class="accounts">
+    <div @click="clickOutside" class="overlay"></div>
     <header class="header">
       <h2>Учетные записи</h2>
       <el-button type="primary" @click="onAdd">+</el-button>
     </header>
 
-    <el-form>
+    <el-form class="form">
       <div v-for="item in store.list" :key="item.id" class="row">
         <el-form-item :error="errors[item.id]?.tagsInput">
           <el-input
@@ -112,10 +113,6 @@ const onBlur = (id: string, field: Field, value: string) => {
   }
 
   validateField(id, field)
-
-  if (validateAll()) {
-    store.commit()
-  }
 }
 
 const onAdd = () => {
@@ -128,6 +125,12 @@ const onRemove = (id: string) => {
   store.drop(id)
   store.commit()
 }
+
+const clickOutside = () => {
+  if (validateAll()) {
+    store.commit()
+  }
+}
 </script>
 
 <style scoped>
@@ -139,14 +142,24 @@ const onRemove = (id: string) => {
 }
 
 .header {
+  position: relative;
+  z-index: 3;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .row {
+  position: relative;
+  z-index: 3;
   display: grid;
   grid-template-columns: 1.5fr 1fr 1fr 1fr auto;
   gap: 8px;
+}
+
+.overlay {
+  position: fixed;
+  background: #ffffff40;
+  inset: 0;
 }
 </style>
