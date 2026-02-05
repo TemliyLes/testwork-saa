@@ -6,6 +6,13 @@
       <el-button class="add" type="primary" @click="onAdd">+</el-button>
     </header>
 
+    <div class="info">
+      <span class="rounded">?</span>
+      <span
+        >Для указания нескольких меток для одной пары логин/пароль используйте разделитель ;</span
+      >
+    </div>
+
     <div class="row" :style="gridTemplateStyle('LOCAL')">
       <div v-for="label in LABEL_LIST" :key="label">
         <div>{{ label }}</div>
@@ -217,6 +224,28 @@ onMounted(() => {
   z-index: 3;
   display: grid;
   gap: 8px;
+}
+
+.info {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  background: #b3ddff;
+  padding: 8px;
+  align-items: baseline;
+}
+
+.rounded {
+  width: 20px;
+  height: 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border: solid 2px #111;
+  color: #111;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
 }
 
 .overlay {
