@@ -20,7 +20,8 @@
           <el-select
             v-model="item.authType"
             placeholder="Тип записи"
-            @change="onBlur(item.id, 'authType', item.authType)"
+            @change="onTypeChange(item.id, item.authType)"
+            @visible-change="(visible: boolean) => onSelectClose(item.id, visible)"
           >
             <el-option v-for="opt in options" :key="opt" :label="opt" :value="opt" />
           </el-select>
@@ -36,6 +37,7 @@
 
         <el-form-item v-if="item.authType === 'LOCAL'" :error="errors[item.id]?.secret">
           <el-input
+            placeholder="Пароль"
             type="password"
             v-model="item.secret"
             @blur="onBlur(item.id, 'secret', item.secret ?? '')"
@@ -66,21 +68,39 @@ const validateField = (id: string, field: Field) => {
   const item = store.list.find((i) => i.id === id)
   if (!item) return
 
-  if (!errors[id]) {
-    errors[id] = {}
-  }
+  if (!errors[id]) errors[id] = {}
 
   switch (field) {
+    case 'tagsInput':
+      if (item.tagsInput.length > 50) {
+        errors[id].tagsInput = 'Максимум 50 символов'
+      } else {
+        errors[id].tagsInput = ''
+      }
+      break
+
     case 'authType':
       errors[id].authType = item.authType ? '' : 'Тип обязателен'
       break
 
     case 'username':
-      errors[id].username = item.username.trim() ? '' : 'Логин обязателен'
+      if (!item.username.trim()) {
+        errors[id].username = 'Логин обязателен'
+      } else if (item.username.length > 100) {
+        errors[id].username = 'Максимум 100 символов'
+      } else {
+        errors[id].username = ''
+      }
       break
 
     case 'secret':
-      errors[id].secret = item.authType === 'LOCAL' && !item.secret ? 'Пароль обязателен' : ''
+      if (item.authType === 'LOCAL' && !item.secret) {
+        errors[id].secret = 'Пароль обязателен'
+      } else if (item.secret && item.secret.length > 100) {
+        errors[id].secret = 'Максимум 100 символов'
+      } else {
+        errors[id].secret = ''
+      }
       break
   }
 }
@@ -130,6 +150,17 @@ const clickOutside = () => {
   if (validateAll()) {
     store.commit()
   }
+}
+
+const onSelectClose = (id: string, visible: boolean) => {
+  if (!visible) {
+    validateField(id, 'authType')
+  }
+}
+
+const onTypeChange = (id: string, value: AuthKind | '') => {
+  store.patch(id, { authType: value })
+  validateField(id, 'authType')
 }
 </script>
 
